@@ -4,22 +4,19 @@ import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.Picture;
 
 public class SeamCarver {
-    // the only data structures I used are multi dimensional arrays, I was considering using a symbol table or a ternary tree structure (composed of Nodes that i would define) but I think this way is faster, since I only have to find the minimum element from three positions above, tehrefore finding a minimum element takes O(width + 3(height-1)) to find the minimum seam
+
     private static final boolean horizontal_orient = false;
     private static final boolean vertical_orient = true;
     private Picture picture;
     private final Picture copy;
     private int width;
     private int height;
-    // instance variables to keep track of the width or height when the matrix is transposed, instead of checking the orientation each time. the value is updated as soon as the orientation is changed and then used for subsequent purposes
+   
     private int width_orient;
     private int height_orient;
-    // the energy matrix is an instance variable because most functions require it. the matrix with path lengths (topological_matrix) is computed based on the energy matrix
     private double[][] energy_matrix;
-    // default orientation is vertical; when horizontal orientation is required, we change it to false and then back to true once the operation has been performed
     private boolean orientation;
     
-    // create a seam carver object based on the given picture
     public SeamCarver(Picture picture) {
         if (picture == null)
             throw new NullPointerException();
@@ -32,26 +29,18 @@ public class SeamCarver {
         copy = new Picture(picture);
     }
     
-    // current picture
-    // time taken: constant
     public Picture picture() {
         return picture;
     }
 
-    // width of current picture
-    // time taken: constant
     public int width() {
         return width;
     }
     
-    // height of current picture
-    // time taken: constant
     public int height() {
         return height;
     }
     
-    // sets orientation and changes the width_orient and height_orient values
-    // time taken: constant
     private void set_orientation(boolean orient) {
         orientation = orient;
         if (orientation == vertical_orient) {
@@ -72,7 +61,6 @@ public class SeamCarver {
     }
     
     // computes the required sum of squares value with the given parameters (wraps around the picture)
-    // time taken: constant
     private double compute_energy_pixel(int x1, int y1, int x2, int y2) {
         if (x1 > width-1) x1 = 0;
         if (y1 > height-1) y1 = 0;
@@ -87,17 +75,14 @@ public class SeamCarver {
     }
     
     // energy of pixel at column x and row y
-    // time taken: two calls to compute_energy_pixel(), therefore constant
     public  double energy(int x, int y) {
         return Math.pow(compute_energy_pixel(x+1, y, x-1, y) + compute_energy_pixel(x, y+1, x, y-1), 0.5);
     }
     
-    // computes the energy matrix, by calling the energy function for each pixel
     // orientation = true implies vertical seam, false for horizontal seam; we transpose the matrix if orientation equals false
-    // time taken: O(width*height)
     private void compute_energy_matrix(boolean orientation) {
         energy_matrix = new double[height_orient][width_orient];
-        // instead of reducing the code and using one loop, i figured this would take less time rather than using an if statement to check orientation for every pixel
+
         if (orientation == vertical_orient) {
             for (int i = 0; i < height; i++) 
                 for (int j = 0; j < width; j++)
@@ -111,7 +96,6 @@ public class SeamCarver {
     }
     
     // computes the value i.e. chooses the shortest path length until that point
-    // time taken: constant
     private void compute_value(int i1, int j1, int i, int j, double[][] ans_matrix) {
         if (i < 0 || j < 0 || i > height_orient-1 || j > width_orient-1)
             return;
@@ -121,7 +105,6 @@ public class SeamCarver {
     }
     
     // computes the topological matrix by calculating for each pixel position the shortest path length until that pixel
-    // time taken: three calls to compute_value for each pixel, therefore for width*height number of pixels O(width*height)
     private double[][] compute_topological() {
         double[][] top_matrix = new double[height_orient][width_orient];
         for (int i = 0; i < width_orient; i++)
@@ -157,9 +140,7 @@ public class SeamCarver {
         return index;
     }
     
-    // sequence of indices for horizontal seam
     // sets the orientation to horizontal, therefore works with the transpose of the enrgy matrix and after the energy and topological matrix have been computed, sets orientation back to default i.e. vertical
-    // time taken: time taken by findVerticalSeam = O(width*height)
     public int[] findHorizontalSeam() {
         int[] seam = new int[width_orient];
         set_orientation(horizontal_orient);
@@ -170,7 +151,6 @@ public class SeamCarver {
     }
     
     // sequence of indices for vertical seam
-    // time taken: time to compute energy and topological matrix is O(width*height), for the last row O(width or height) to find the minimum element, for subsequent rows, checks three positions above to find the minimum, therefore O(width + 3(height-1)) therefore the total is O(width*height)
     public int[] findVerticalSeam() {
         // once you find the min in the bottom row, check for duplicates
         compute_energy_matrix(orientation);
@@ -192,7 +172,6 @@ public class SeamCarver {
     }    
         
     // remove horizontal seam from current picture
-    // time taken: O(width*height)
     public void removeHorizontalSeam(int[] seam) {
         if (seam == null)
             throw new NullPointerException();
@@ -210,7 +189,6 @@ public class SeamCarver {
     }
     
     // remove vertical seam from current picture
-    // time taken: O(width*height)
     public void removeVerticalSeam(int[] seam) {
         if (seam == null)
             throw new NullPointerException();
